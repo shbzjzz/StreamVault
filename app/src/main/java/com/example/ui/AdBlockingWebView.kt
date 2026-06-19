@@ -55,7 +55,7 @@ fun AdBlockingWebView(
                         private val adHosts = hashSetOf(
                             "doubleclick.net", "google-analytics.com", "googlesyndication.com",
                             "popads.net", "popcash.net", "propellerads.com", "adnxs.com",
-                            "adsterra.com", "onclickads.net", "yandex.ru", "adscore.com",
+                            "adsterra.com", "onclickads.net", "yandex.ru", 
                             "scorecardresearch.com", "bet365.com", "casino.com", "mgid.com",
                             "outbrain.com", "taboola.com", "juicyads.com", "exoclick.com"
                         )
