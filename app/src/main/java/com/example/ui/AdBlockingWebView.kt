@@ -151,12 +151,13 @@ fun AdBlockingWebView(
             },
             update = { webView ->
                 if (webView.url != currentUrl) {
-                    // Send explicit Referer header to bypass provider security checks
-                    val headers = mapOf(
-                        "Referer" to "https://www.google.com/",
-                        "Upgrade-Insecure-Requests" to "1"
-                    )
-                    webView.loadUrl(currentUrl, headers)
+                    val html = """
+                        <html><body style="margin:0;background:#000">
+                        <iframe src="$currentUrl" style="width:100%;height:100%;border:0"
+                          allow="autoplay; fullscreen" allowfullscreen></iframe>
+                        </body></html>
+                    """.trimIndent()
+                    webView.loadDataWithBaseURL(currentUrl, html, "text/html", "UTF-8", currentUrl)
                 }
             }
         )

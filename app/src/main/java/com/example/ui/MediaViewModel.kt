@@ -42,6 +42,26 @@ val PROVIDERS = listOf(
         { id -> "https://vidsrc.cc/v2/embed/movie/$id" },
         { id, s, e -> "https://vidsrc.cc/v2/embed/tv/$id/$s/$e" }
     ),
+    StreamingProvider(
+        "VidSrc.to", "Stable",
+        { id -> "https://vidsrc.to/embed/movie/$id" },
+        { id, s, e -> "https://vidsrc.to/embed/tv/$id/$s/$e" }
+    ),
+    StreamingProvider(
+        "2Embed", "Backup",
+        { id -> "https://www.2embed.cc/embed/$id" },
+        { id, s, e -> "https://www.2embed.cc/embedtv/$id&s=$s&e=$e" }
+    ),
+    StreamingProvider(
+        "AutoEmbed", "Backup2",
+        { id -> "https://player.autoembed.cc/embed/movie/$id" },
+        { id, s, e -> "https://player.autoembed.cc/embed/tv/$id/$s/$e" }
+    ),
+    StreamingProvider(
+        "VidLink", "Fast",
+        { id -> "https://vidlink.pro/movie/$id" },
+        { id, s, e -> "https://vidlink.pro/tv/$id/$s/$e" }
+    )
 )
 
 data class GenreItem(val id: Int, val name: String)
