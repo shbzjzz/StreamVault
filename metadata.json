@@ -1,0 +1,6 @@
+{
+  "name": "StreamVault",
+  "description": "Stream movies and series with multiple streaming providers and built-in ad blocker WebView.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
