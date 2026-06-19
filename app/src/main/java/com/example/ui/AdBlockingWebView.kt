@@ -154,7 +154,7 @@ fun AdBlockingWebView(
                     val html = """
                         <html><body style="margin:0;background:#000">
                         <iframe src="$currentUrl" style="width:100%;height:100%;border:0"
-                          allow="autoplay; fullscreen" allowfullscreen></iframe>
+                          allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope" allowfullscreen></iframe>
                         </body></html>
                     """.trimIndent()
                     webView.loadDataWithBaseURL(currentUrl, html, "text/html", "UTF-8", currentUrl)
