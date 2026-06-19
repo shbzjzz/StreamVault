@@ -23,35 +23,25 @@ data class StreamingProvider(
 
 val PROVIDERS = listOf(
     StreamingProvider(
-        "VidLink", "Low ads",
-        { id -> "https://vidlink.pro/movie/$id" },
-        { id, s, e -> "https://vidlink.pro/tv/$id/$s/$e" }
+        "NontonGo", "CF-free",
+        { id -> "https://www.NontonGo.win/embed/movie/$id" },
+        { id, s, e -> "https://www.NontonGo.win/embed/tv/$id/$s/$e" }
     ),
     StreamingProvider(
-        "VidSrc Pro", "HD",
-        { id -> "https://vidsrc.pro/embed/movie/$id" },
-        { id, s, e -> "https://vidsrc.pro/embed/tv?tmdb=$id&season=$s&episode=$e" }
+        "embed.su", "Clean",
+        { id -> "https://embed.su/embed/movie/$id" },
+        { id, s, e -> "https://embed.su/embed/tv/$id/$s/$e" }
     ),
     StreamingProvider(
-        "VidSrc.fyi", "Multi-CDN",
-        { id -> "https://vidsrc.fyi/embed/movie/$id" },
-        { id, s, e -> "https://vidsrc.fyi/embed/tv/$id/$s/$e" }
+        "SuperEmbed", "Multi",
+        { id -> "https://multiembed.mov/?video_id=$id&tmdb=1" },
+        { id, s, e -> "https://multiembed.mov/?video_id=$id&tmdb=1&s=$s&e=$e" }
     ),
     StreamingProvider(
-        "2Embed", "Fast",
-        { id -> "https://www.2embed.cc/embed/$id" },
-        { id, s, e -> "https://www.2embed.cc/embedtv/$id&s=$s&e=$e" }
+        "VidSrc.cc", "Alt",
+        { id -> "https://vidsrc.cc/v2/embed/movie/$id" },
+        { id, s, e -> "https://vidsrc.cc/v2/embed/tv/$id/$s/$e" }
     ),
-    StreamingProvider(
-        "AutoEmbed", "Auto",
-        { id -> "https://player.autoembed.cc/embed/movie/$id" },
-        { id, s, e -> "https://player.autoembed.cc/embed/tv/$id/$s/$e" }
-    ),
-    StreamingProvider(
-        "VidBinge", "Clean",
-        { id -> "https://vidbinge.dev/embed/movie/$id" },
-        { id, s, e -> "https://vidbinge.dev/embed/tv/$id/$s/$e" }
-    )
 )
 
 data class GenreItem(val id: Int, val name: String)

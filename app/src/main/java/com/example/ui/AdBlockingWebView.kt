@@ -47,27 +47,82 @@ fun AdBlockingWebView(
                         useWideViewPort = true
                         loadWithOverviewMode = true
                         
-                        userAgentString = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                        // Spoof Desktop Chrome for maximum compatibility and block avoidance
+                        userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
                     }
 
                     webViewClient = object : WebViewClient() {
+                        private val adHosts = hashSetOf(
+                            "doubleclick.net", "google-analytics.com", "googlesyndication.com",
+                            "popads.net", "popcash.net", "propellerads.com", "adnxs.com",
+                            "adsterra.com", "onclickads.net", "yandex.ru", "adscore.com",
+                            "scorecardresearch.com", "bet365.com", "casino.com", "mgid.com",
+                            "outbrain.com", "taboola.com", "juicyads.com", "exoclick.com"
+                        )
+
+                        override fun shouldInterceptRequest(
+                            view: WebView?,
+                            request: WebResourceRequest?
+                        ): WebResourceResponse? {
+                            val url = request?.url?.toString() ?: return null
+                            val host = request.url.host?.lowercase() ?: ""
+                            
+                            // Block known ad/tracker hosts
+                            if (adHosts.any { host.contains(it) }) {
+                                return WebResourceResponse("text/plain", "UTF-8", null)
+                            }
+                            
+                            // Block obvious ad patterns in paths
+                            val path = url.lowercase()
+                            if (path.contains("/ads/") || path.contains("adserver") || path.contains("adster")) {
+                                return WebResourceResponse("text/plain", "UTF-8", null)
+                            }
+
+                            return super.shouldInterceptRequest(view, request)
+                        }
+
                         override fun shouldOverrideUrlLoading(
                             view: WebView?,
                             request: WebResourceRequest?
                         ): Boolean {
-                            return false // Allow all loading
+                            val reqUrl = request?.url?.toString() ?: return false
+                            
+                            // Prevent external app hijacks
+                            if (reqUrl.startsWith("intent://") || reqUrl.startsWith("market://")) {
+                                return true 
+                            }
+
+                            return false // Let the engine handle navigation
                         }
 
                         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                             onLoadingStateChanged(true)
+                            injectShields(view)
                         }
 
                         override fun onPageFinished(view: WebView?, url: String?) {
                             onLoadingStateChanged(false)
+                            injectShields(view)
                             // Inject referer metadata to bypass provider checks
                             view?.evaluateJavascript(
                                 "Object.defineProperty(document, 'referrer', {get: () => 'https://www.google.com'});",
                                 null
+                            )
+                        }
+
+                        private fun injectShields(view: WebView?) {
+                            view?.evaluateJavascript(
+                                """
+                                (function() {
+                                    // Block common intrusive popup/overlay patterns
+                                    const style = document.createElement('style');
+                                    style.textContent = '.ad, .ads, [class*="ad-"], [id*="ad-"], div[style*="z-index: 2147483647"] { display: none !important; }';
+                                    document.head.appendChild(style);
+
+                                    // Intercept window.open
+                                    window.open = function() { return { focus: function() {}, close: function() {} }; };
+                                })();
+                                """.trimIndent(), null
                             )
                         }
                     }
@@ -87,22 +142,21 @@ fun AdBlockingWebView(
                         }
 
                         override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
-                            val childWebView = WebView(view!!.context).apply {
-                                settings.javaScriptEnabled = true
-                                settings.domStorageEnabled = true
-                                webViewClient = WebViewClient()
-                            }
-                            val transport = resultMsg?.obj as? WebView.WebViewTransport
-                            transport?.webView = childWebView
-                            resultMsg?.sendToTarget()
-                            return true
+                            // Replicate "Brave" behavior: block unwanted popup windows entirely
+                            onConsoleMessage("🛡️ BraveEngine: Blocked popup window")
+                            return false
                         }
                     }
                 }
             },
             update = { webView ->
                 if (webView.url != currentUrl) {
-                    webView.loadUrl(currentUrl, mapOf("Referer" to "https://www.google.com"))
+                    // Send explicit Referer header to bypass provider security checks
+                    val headers = mapOf(
+                        "Referer" to "https://www.google.com/",
+                        "Upgrade-Insecure-Requests" to "1"
+                    )
+                    webView.loadUrl(currentUrl, headers)
                 }
             }
         )
