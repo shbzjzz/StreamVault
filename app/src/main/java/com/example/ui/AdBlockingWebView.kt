@@ -1,6 +1,7 @@
 package com.example.ui
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.View
 import android.webkit.*
 import androidx.compose.foundation.background
@@ -56,6 +57,19 @@ fun AdBlockingWebView(
                         ): Boolean {
                             return false // Allow all loading
                         }
+
+                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                            onLoadingStateChanged(true)
+                        }
+
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            onLoadingStateChanged(false)
+                            // Inject referer metadata to bypass provider checks
+                            view?.evaluateJavascript(
+                                "Object.defineProperty(document, 'referrer', {get: () => 'https://www.google.com'});",
+                                null
+                            )
+                        }
                     }
 
                     webChromeClient = object : WebChromeClient() {
@@ -64,9 +78,22 @@ fun AdBlockingWebView(
                             return true
                         }
 
+                        override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+                            view?.let { onFullscreenShow(it) }
+                        }
+
+                        override fun onHideCustomView() {
+                            onFullscreenHide()
+                        }
+
                         override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
+                            val childWebView = WebView(view!!.context).apply {
+                                settings.javaScriptEnabled = true
+                                settings.domStorageEnabled = true
+                                webViewClient = WebViewClient()
+                            }
                             val transport = resultMsg?.obj as? WebView.WebViewTransport
-                            transport?.webView = view
+                            transport?.webView = childWebView
                             resultMsg?.sendToTarget()
                             return true
                         }
@@ -75,7 +102,7 @@ fun AdBlockingWebView(
             },
             update = { webView ->
                 if (webView.url != currentUrl) {
-                    webView.loadUrl(currentUrl)
+                    webView.loadUrl(currentUrl, mapOf("Referer" to "https://www.google.com"))
                 }
             }
         )
